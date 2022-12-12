@@ -1,0 +1,57 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl", "darwin-arm64"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model migrations {
+  id             Int       @id @default(dbgenerated("nextval('_migrations_id_seq'::regclass)"))
+  name           String?   @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime? @db.Timestamptz(6)
+
+  @@map("_migrations")
+}
+
+model migrations_lock {
+  index     Int  @id @default(dbgenerated("nextval('_migrations_lock_index_seq'::regclass)"))
+  is_locked Int?
+
+  @@map("_migrations_lock")
+}
+
+model Customer {
+  id     Int     @id @default(autoincrement())
+  name   String? @db.VarChar(255)
+  email  String? @unique(map: "customer_email_unique") @db.VarChar(255)
+  orders Order[]
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  title      String?     @db.VarChar(255)
+  content    String?     @db.VarChar(255)
+  customerId Int?
+  customer   Customer?   @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "order_customerid_foreign")
+  OrderPart  OrderPart[]
+}
+
+model Part {
+  id          Int         @id @default(autoincrement())
+  name        String?     @db.VarChar(255)
+  description String?     @db.VarChar(255)
+  quantity    String?     @db.VarChar(255)
+  OrderPart   OrderPart[]
+}
+
+model OrderPart {
+  id      Int    @id @default(autoincrement())
+  partId  Int?
+  orderId Int?
+  Order   Order? @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "orderpart_orderid_foreign")
+  Part    Part?  @relation(fields: [partId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "orderpart_partid_foreign")
+}

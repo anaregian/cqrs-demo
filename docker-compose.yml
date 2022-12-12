@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: app
+    build:
+      context: ./
+      target: development
+    command: npm run start:debug
+    links:
+      - "postgres:localhost"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    volumes:
+      - ./:/src
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+      - 9229:9229
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=cqrs_demo_db
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_USER}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    volumes:
+      - ./config/servers.json:/pgadmin4/servers.json
+    ports:
+      - 5050:80
+    logging:
+      driver: none
+
+volumes:
+  postgres:
+    driver: local
