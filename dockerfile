@@ -1,10 +1,4 @@
-FROM node:18-slim AS development
-
-RUN apt-get update
-
-RUN apt-get install -y openssl
-
-RUN apt-get install -y procps
+FROM node:18-alpine AS development
 
 WORKDIR /src
 
@@ -13,8 +7,6 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-
-RUN npm run db:generate
 
 RUN npm run build
 
@@ -33,4 +25,4 @@ COPY . .
 
 COPY --from=development /src/dist ./dist
 
-CMD ["node", "dist/apps/inventory/main"]
+CMD ["node", "dist/main"]

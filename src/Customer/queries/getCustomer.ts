@@ -1,6 +1,7 @@
+import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Customer } from '@prisma/client';
-import { DatabaseService } from '../../Database/databaseService';
+import { Customer } from '../../Database/entities';
+import { Repository } from 'typeorm';
 import { CustomerNotFoundException } from '../exceptions';
 
 export class GetCustomerQuery {
@@ -9,10 +10,10 @@ export class GetCustomerQuery {
 
 @QueryHandler(GetCustomerQuery)
 export class GetCustomerHandler implements IQueryHandler<GetCustomerQuery> {
-  constructor(private db: DatabaseService) {}
+  constructor(@Inject(Customer.name) private customerRepository: Repository<Customer>) {}
 
   async execute(query: GetCustomerQuery): Promise<Customer> {
-    const customer = await this.db.customer.findFirst({ where: { id: query.id } });
+    const customer = await this.customerRepository.findOneBy({ id: query.id });
 
     if (!customer) {
       throw new CustomerNotFoundException(query.id);

@@ -1,13 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'nestjs-zod/z';
 
-export class UpdateCustomerDto {
+const UpdateCustomerSchema = z.object({
+  name: z.string().nonempty(),
+  email: z.string().nonempty().email(),
+});
+
+export class UpdateCustomerDto extends createZodDto(UpdateCustomerSchema) {
   @ApiProperty()
-  @IsNotEmpty()
   name: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsEmail()
   email: string;
 }

@@ -1,6 +1,8 @@
 import { DuplicateCustomerFoundException } from '../exceptions';
-import { DatabaseService } from '../../Database/databaseService';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
+import { Customer } from '../../Database/entities';
+import { Repository } from 'typeorm';
 
 export class CreateCustomerCommand {
   constructor(public readonly name: string, public readonly email: string) {}
@@ -8,15 +10,15 @@ export class CreateCustomerCommand {
 
 @CommandHandler(CreateCustomerCommand)
 export class CreateCustomerHandler implements ICommandHandler<CreateCustomerCommand> {
-  constructor(private db: DatabaseService) {}
+  constructor(@Inject(Customer.name) private customerRepository: Repository<Customer>) {}
 
   async execute(command: CreateCustomerCommand): Promise<void> {
-    const customer = await this.db.customer.findFirst({ where: { email: command.email } });
+    const customer = await this.customerRepository.findOneBy({ email: command.email });
 
     if (customer) {
       throw new DuplicateCustomerFoundException(command.email);
     }
 
-    await this.db.customer.create({ data: command });
+    await this.customerRepository.insert(command);
   }
 }

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { DatabaseModule } from '../Database/databaseModule';
+import { customerProvider, DatabaseModule } from '../Database/databaseModule';
 import { CreateCustomerHandler, UpdateCustomerHandler, DeleteCustomerHandler } from './commands';
 import { GetCustomerHandler, GetCustomersHandler } from './queries';
 import { CustomerController } from './customerController';
@@ -16,6 +16,6 @@ const handlers = [
 @Module({
   imports: [CqrsModule, DatabaseModule],
   controllers: [CustomerController],
-  providers: [...handlers],
+  providers: [...handlers, customerProvider],
 })
 export class CustomerModule {}

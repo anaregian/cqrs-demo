@@ -1,6 +1,7 @@
+import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Customer } from '@prisma/client';
-import { DatabaseService } from '../../Database/databaseService';
+import { Customer } from '../../Database/entities';
+import { Repository } from 'typeorm';
 
 export class GetCustomersQuery {
   constructor() {}
@@ -8,10 +9,10 @@ export class GetCustomersQuery {
 
 @QueryHandler(GetCustomersQuery)
 export class GetCustomersHandler implements IQueryHandler<GetCustomersQuery> {
-  constructor(private db: DatabaseService) {}
+  constructor(@Inject(Customer.name) private customerRepository: Repository<Customer>) {}
 
-  async execute(): Promise<Customer[]> {
-    const customers = await this.db.customer.findMany();
+  async execute(_: GetCustomersQuery): Promise<Customer[]> {
+    const customers = await this.customerRepository.find();
 
     return customers;
   }

@@ -1,5 +1,7 @@
-import { DatabaseService } from '../../Database/databaseService';
+import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Customer } from '../../Database/entities';
+import { Not, Repository } from 'typeorm';
 import { CustomerNotFoundException, DuplicateCustomerFoundException } from '../exceptions';
 
 export class UpdateCustomerCommand {
@@ -8,23 +10,24 @@ export class UpdateCustomerCommand {
 
 @CommandHandler(UpdateCustomerCommand)
 export class UpdateCustomerHandler implements ICommandHandler<UpdateCustomerCommand> {
-  constructor(private db: DatabaseService) {}
+  constructor(@Inject(Customer.name) private customerRepository: Repository<Customer>) {}
 
   async execute(command: UpdateCustomerCommand): Promise<void> {
-    const customer = await this.db.customer.findFirst({ where: { id: command.id } });
+    const customer = await this.customerRepository.findOneBy({ id: command.id });
 
-    if (customer) {
+    if (!customer) {
       throw new CustomerNotFoundException(command.id);
     }
 
-    const duplicateEmailCustomer = await this.db.customer.findFirst({
-      where: { id: { not: command.id }, email: customer.email },
+    const duplicateEmailCustomer = await this.customerRepository.findOneBy({
+      id: Not(command.id),
+      email: command.email,
     });
 
     if (duplicateEmailCustomer) {
       throw new DuplicateCustomerFoundException(command.email);
     }
 
-    await this.db.customer.update({ where: { id: command.id }, data: { name: command.name, email: command.email } });
+    await this.customerRepository.update({ id: command.id }, { name: command.name, email: command.email });
   }
 }
