@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
+import { INestApplication, VersioningType } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { Repository, DataSource } from 'typeorm';
@@ -27,7 +27,6 @@ describe('When calling the POST customer endpoint', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     app.setGlobalPrefix('/api');
     app.enableVersioning({
       type: VersioningType.URI,
@@ -59,7 +58,10 @@ describe('When calling the POST customer endpoint', () => {
     };
     const expectedId = 3;
 
-    const response = await request(app.getHttpServer()).post('/api/v1/customers').send(dto);
+    const response = await request(app.getHttpServer()).post('/api/v1/customers').send({
+      name: 'test2',
+      email: 'test2@test.com',
+    });
 
     const customer = await customerRepository.findOneBy({ id: expectedId });
 

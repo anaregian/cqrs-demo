@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
+import { INestApplication, VersioningType } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { Repository, DataSource } from 'typeorm';
@@ -37,7 +37,6 @@ describe('When calling the PUT customer endpoint', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     app.setGlobalPrefix('/api');
     app.enableVersioning({
       type: VersioningType.URI,
