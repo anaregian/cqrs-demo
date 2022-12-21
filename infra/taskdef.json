@@ -1,0 +1,21 @@
+{
+  "executionRoleArn": "arn:aws:iam::601912882130:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "protocol": "tcp",
+          "containerPort": 80
+        }
+      ],
+      "image": "601912882130.dkr.ecr.eu-west-1.amazonaws.com/javalin-app:425ad54",
+      "name": "javalin-app"
+    }
+  ],
+  "memory": "512",
+  "family": "javalin-app-td",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256"
+}
